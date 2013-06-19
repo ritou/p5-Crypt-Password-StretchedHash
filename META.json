@@ -57,5 +57,15 @@
       }
    },
    "release_status" : "unstable",
+   "resources" : {
+      "bugtracker" : {
+         "web" : "https://github.com/ritou/p5-Crypt-Password-StretchedHash/issues"
+      },
+      "homepage" : "https://github.com/ritou/p5-Crypt-Password-StretchedHash",
+      "repository" : {
+         "url" : "https://github.com/ritou/p5-Crypt-Password-StretchedHash.git",
+         "web" : "https://github.com/ritou/p5-Crypt-Password-StretchedHash"
+      }
+   },
    "version" : "0.01"
 }
