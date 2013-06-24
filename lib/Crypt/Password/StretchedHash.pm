@@ -17,7 +17,7 @@ use Params::Validate qw(
     OBJECT
 );
 
-our @EXPORT = qw(crypt verify);
+our @EXPORT = qw(crypt verify crypt_with_hashinfo verify_with_hashinfo);
 
 sub crypt {
     my $self = shift;
@@ -31,10 +31,10 @@ sub crypt {
     });
 
     my $salt = $params{salt};
-    unless ( $params{hash}->isa("Digest::SHA") || 
-             $params{hash}->isa("Digest::SHA3")){
-        croak "\$params{hash} must be Digest::SHAx Object";
-    }
+    croak "\$params{hash} must be Digest::SHAx Object"
+        unless ( $params{hash}->isa("Digest::SHA") || 
+                $params{hash}->isa("Digest::SHA3"));
+
     my $hash = $params{hash};
 
     croak "\$params{stretch_count} must be more than 1"
@@ -50,6 +50,7 @@ sub crypt {
         $pwhash = unpack("H*", $pwhash);
     }elsif( exists $params{format} && $params{format} eq q{base64} ){
         $pwhash = encode_base64 $pwhash;
+        $pwhash =~ s/\n//;
         chomp($pwhash);
     }
 
@@ -74,6 +75,89 @@ sub verify {
     return ( $calculated_pwhash eq $pwhash );
 }
 
+sub crypt_with_hashinfo {
+    my $self = shift;
+
+    my %params = Params::Validate::validate(@_, {
+        password    => { type => SCALAR },
+        hash_info   => { type => OBJECT },
+    });
+
+    # validate hashinfo object
+    my $hash_info = $params{hash_info};
+    croak "\$params{hash_info} must be Crypt::Password::StretchedHash::HashInfo Object"
+        unless ( $hash_info->isa("Crypt::Password::StretchedHash::HashInfo") );
+
+    my $salt = $hash_info->salt;
+
+    my $pwhash = $self->crypt(
+        password        => $params{password},
+        hash            => $hash_info->hash,
+        salt            => $salt,
+        stretch_count   => $hash_info->stretch_count,
+        format          => $hash_info->format,
+    );
+
+    if ( $hash_info->format eq q{hex} ){
+        $salt = unpack("H*", $salt);
+    }elsif( $hash_info->format eq q{base64} ){
+        $salt = encode_base64 $salt;
+        chomp($salt);
+    }
+    
+    return  $hash_info->delimiter . 
+            $hash_info->identifier.
+            $hash_info->delimiter.
+            $salt.
+            $hash_info->delimiter.
+            $pwhash;
+
+}
+
+sub verify_with_hashinfo {
+    my $self = shift;
+
+    my %params = Params::Validate::validate(@_, {
+        password        => { type => SCALAR },
+        password_hash   => { type => SCALAR },
+        hash_info       => { type => OBJECT },
+    });
+
+    # validate hashinfo object
+    my $hash_info = $params{hash_info};
+    croak "\$params{hash_info} must be Crypt::Password::StretchedHash::HashInfo Object"
+        unless ( $hash_info->isa("Crypt::Password::StretchedHash::HashInfo") );
+
+    # split password hash
+    my $delimiter = $hash_info->delimiter;
+    my $identifier = $hash_info->identifier;
+    my ( $pwhash, $salt );
+    if ( $params{password_hash} =~ /\A[$delimiter][$identifier][$delimiter](.+)[$delimiter](.+)\z/ ){
+        $salt = $1;
+        $pwhash = $2;
+    } else {
+        return;
+    }
+
+    # obtain law_salt string
+    if ( $hash_info->format eq q{hex} ){
+        $salt = pack("H*", $salt);
+    }elsif( $hash_info->format eq q{base64} ){
+        $salt = decode_base64 $salt;
+    }
+
+    # generate hashed password
+    my $expected_pwhash = $self->crypt(
+        password        => $params{password},
+        hash            => $hash_info->hash,
+        salt            => $salt,
+        stretch_count   => $hash_info->stretch_count,
+        format          => $hash_info->format,
+    );
+    return ( $expected_pwhash eq $pwhash );
+
+}
+
 1;
 __END__
 
@@ -84,6 +168,9 @@ __END__
 Crypt::Password::StretchedHash - simple library for password hashing and stretching
 
 =head1 SYNOPSIS
+
+This module provides Generation / Verification method for hashed password string.
+There are two methods to handle parameters simply.
 
     use Test::More;
     use Crypt::Password::StretchedHash;
@@ -109,6 +196,33 @@ Crypt::Password::StretchedHash - simple library for password hashing and stretch
         format          => q{base64},
     );
 
+    unless ( $result ) {
+        # password error
+    }
+
+if you use class of the hash information(Crypt::Passwoed::SaltedHash::HashInfo),
+there are two methods to generate/verify string for DB Store. 
+
+    use Your::Password::HashInfo;
+    use Crypt::Password::StretchedHash;
+    
+    my $hash_info = Your::Password::HashInfo->new;
+    # crypt
+    my $password = ...;
+    my $pwhash_with_hashinfo = crypt_with_hashinfo(
+        password    => $password,
+        hash_info   => $hash_info,
+    );
+    
+    # verify
+    my $password = ...;
+    my $pwhash_with_hashinfo = ...;
+    my $result = verify_with_hashinfo(
+        password        => $password,
+        password_hash   => $pwhash_with_hashinfo,
+        hash_info   => $hash_info,
+    );
+    
     unless ( $result ) {
         # password error
     }
@@ -162,6 +276,15 @@ If it has "base64", the password hash is returned with base64 representation.
 =head2 verify( %params ) : Int
 
 Verifies stretched password hash.
+This compares the value of $params{password_hash} with the generated using crypt method.
+
+=head2 crypt_with_hashinfo( %params ) : String
+
+Generates stretched password hash with hash information.
+
+=head2 verify_with_hashinfo( %params ) : Int
+
+Verifies stretched password hash with hash information.
 This compares the value of $params{password_hash} with the generated using crypt method.
 
 =head1 LICENSE

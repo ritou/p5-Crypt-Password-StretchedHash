@@ -4,6 +4,9 @@ Crypt::Password::StretchedHash - simple library for password hashing and stretch
 
 # SYNOPSIS
 
+This module provides Generation / Verification method for hashed password string.
+There are two methods to handle parameters simply.
+
     use Test::More;
     use Crypt::Password::StretchedHash;
     use Digest::SHA;
@@ -27,6 +30,36 @@ Crypt::Password::StretchedHash - simple library for password hashing and stretch
         stretch_count   => 5000,
         format          => q{base64},
     );
+
+    unless ( $result ) {
+        # password error
+    }
+
+if you use class of the hash information(Crypt::Passwoed::SaltedHash::HashInfo),
+there are two methods to generate/verify string for DB Store. 
+
+    use Your::Password::HashInfo;
+    use Crypt::Password::StretchedHash;
+    
+
+    my $hash_info = Your::Password::HashInfo->new;
+    # crypt
+    my $password = ...;
+    my $pwhash_with_hashinfo = crypt_with_hashinfo(
+        password    => $password,
+        hash_info   => $hash_info,
+    );
+    
+
+    # verify
+    my $password = ...;
+    my $pwhash_with_hashinfo = ...;
+    my $result = verify_with_hashinfo(
+        password        => $password,
+        password_hash   => $pwhash_with_hashinfo,
+        hash_info   => $hash_info,
+    );
+    
 
     unless ( $result ) {
         # password error
@@ -79,6 +112,15 @@ This uses the following hash algorithm.
 ## verify( %params ) : Int
 
 Verifies stretched password hash.
+This compares the value of $params{password\_hash} with the generated using crypt method.
+
+## crypt\_with\_hashinfo( %params ) : String
+
+Generates stretched password hash with hash information.
+
+## verify\_with\_hashinfo( %params ) : Int
+
+Verifies stretched password hash with hash information.
 This compares the value of $params{password\_hash} with the generated using crypt method.
 
 # LICENSE
