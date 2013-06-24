@@ -14,7 +14,6 @@ use MIME::Base64 qw(
 );
 use Params::Validate qw(
     SCALAR
-    OBJECT
 );
 
 our @EXPORT = qw(crypt verify crypt_with_hashinfo verify_with_hashinfo);
@@ -24,7 +23,7 @@ sub crypt {
 
     my %params = Params::Validate::validate(@_, {
         password        => { type => SCALAR },
-        hash            => { type => OBJECT },
+        hash            => 1,
         salt            => { type => SCALAR },
         stretch_count   => { type => SCALAR, regex => qr/\A[0-9]+\z/,},
         format          => { type => SCALAR, optional => 1 },
@@ -63,7 +62,7 @@ sub verify {
     my %params = Params::Validate::validate(@_, {
         password        => { type => SCALAR },
         password_hash   => { type => SCALAR },
-        hash            => { type => OBJECT },
+        hash            => 1,
         salt            => { type => SCALAR },
         stretch_count   => { type => SCALAR, regex => qr/\A[0-9]+\z/,},
         format          => { type => SCALAR, optional => 1 },
@@ -80,7 +79,7 @@ sub crypt_with_hashinfo {
 
     my %params = Params::Validate::validate(@_, {
         password    => { type => SCALAR },
-        hash_info   => { type => OBJECT },
+        hash_info   => 1,
     });
 
     # validate hashinfo object
@@ -120,7 +119,7 @@ sub verify_with_hashinfo {
     my %params = Params::Validate::validate(@_, {
         password        => { type => SCALAR },
         password_hash   => { type => SCALAR },
-        hash_info       => { type => OBJECT },
+        hash_info       => 1,
     });
 
     # validate hashinfo object
