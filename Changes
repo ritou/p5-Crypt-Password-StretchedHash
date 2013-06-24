@@ -2,6 +2,10 @@ Revision history for Perl extension Crypt-Password-StretchedHash
 
 {{$NEXT}}
 
+0.03 2013-06-24T13:28:27Z
+
+    - Fixed pattern match with hash information
+
 0.02 2013-06-24T06:29:11Z
 
     - Added HashInfo class and crypt/verify methods and removed OBJECT validation by Params::Validate
