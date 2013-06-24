@@ -128,12 +128,17 @@ sub verify_with_hashinfo {
         unless ( $hash_info->isa("Crypt::Password::StretchedHash::HashInfo") );
 
     # split password hash
-    my $delimiter = $hash_info->delimiter;
+    my $delimiter = quotemeta($hash_info->delimiter);
     my $identifier = $hash_info->identifier;
     my ( $pwhash, $salt );
-    if ( $params{password_hash} =~ /\A[$delimiter][$identifier][$delimiter](.+)[$delimiter](.+)\z/ ){
-        $salt = $1;
-        $pwhash = $2;
+
+    my @split_password_hash = split( /$delimiter/, $params{password_hash} );
+    if ($params{password_hash} =~ /\A$delimiter/ &&  
+        scalar @split_password_hash == 4 &&
+        $split_password_hash[0] eq q{} &&
+        $identifier eq $split_password_hash[1] ){
+        $salt = $split_password_hash[2];
+        $pwhash = $split_password_hash[3];
     } else {
         return;
     }
