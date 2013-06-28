@@ -47,7 +47,7 @@ __END__
 
 =head1 NAME
 
-Crypt::Password::StretchedHash - Base class that specifies accessor for password information.
+Crypt::Password::StretchedHash::HashInfo - Base class that specifies accessor for password information.
 
 =head1 DESCRIPTION
 
@@ -94,7 +94,7 @@ You implement your HashInfo class as follows.
         return q{base64};
     }
 
-By passing your hashinfo to Crypt::Password::StretchedHash->crypt_with_hashinfo method,
+By passing your hashinfo to Crypt::Password::StretchedHash::crypt_with_hashinfo method,
 you obtain the hashed password with identifier and salt.
 
     use Crypt::Password::StretchedHash qw(
@@ -110,7 +110,7 @@ you obtain the hashed password with identifier and salt.
     );
 
 It is similar at the time of the verification,
-you pass your hashinfo to Crypt::Password::StretchedHash->verify_with_hashinfo method.
+you pass your hashinfo to Crypt::Password::StretchedHash::verify_with_hashinfo method.
 
     use Crypt::Password::StretchedHash qw(
         verify_with_hashinfo
