@@ -9,6 +9,22 @@ use MIME::Base64 qw(
     encode_base64
 );
 
+sub manual_crypt_sha256 {
+    my $hash = Digest::SHA->new("sha256");
+    my $pwhash = q{};
+    my $password = q{password};
+    my $salt = q{salt};
+
+    for (1..5000) {
+        $hash->add( $pwhash, $password, $salt );
+        $pwhash = $hash->digest;
+    }
+
+    $pwhash = encode_base64( $pwhash );
+    chomp($pwhash);
+    return $pwhash;
+}
+
 TEST_CRYPT_MONDATORY: {
 
     my $pwhash = Crypt::Password::StretchedHash->crypt(
@@ -20,7 +36,8 @@ TEST_CRYPT_MONDATORY: {
     ok($pwhash, q{password hash is returned});
     $pwhash = encode_base64( $pwhash );
     chomp($pwhash);
-    is($pwhash, q{4hvvzqZio+l9vGifQ7xF2+FKiyWRcb4lV3OSo9PsfUw=});
+    my $expected =  manual_crypt_sha256;
+    is($pwhash, $expected);
 
 };
 
