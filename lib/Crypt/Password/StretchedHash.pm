@@ -286,10 +286,40 @@ This compares the value of $params{password_hash} with the generated using crypt
 
 Generates stretched password hash with hash information.
 
+=over
+
+=item $params{password}
+
+This is password string.
+
+=item $params{hash_info}
+ 
+This is a hash information.
+You have to inherit L<Crypt::Password::StretchedHash::HashInfo>.
+
+=back
+
 =head2 verify_with_hashinfo( %params ) : Int
 
 Verifies stretched password hash with hash information.
 This compares the value of $params{password_hash} with the generated using crypt method.
+
+=over
+
+=item $params{password}
+
+This is password string.
+
+=item $params{password_hash}
+
+This is hashed password to be compared.
+
+=item $params{hash_info}
+ 
+This is a hash information.
+You have to inherit L<Crypt::Password::StretchedHash::HashInfo>.
+
+=back
 
 =head1 LICENSE
 

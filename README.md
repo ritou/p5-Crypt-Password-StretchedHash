@@ -118,10 +118,34 @@ This compares the value of $params{password\_hash} with the generated using cryp
 
 Generates stretched password hash with hash information.
 
+- $params{password}
+
+    This is password string.
+
+- $params{hash\_info}
+ 
+
+    This is a hash information.
+    You have to inherit [Crypt::Password::StretchedHash::HashInfo](http://search.cpan.org/perldoc?Crypt::Password::StretchedHash::HashInfo).
+
 ## verify\_with\_hashinfo( %params ) : Int
 
 Verifies stretched password hash with hash information.
 This compares the value of $params{password\_hash} with the generated using crypt method.
+
+- $params{password}
+
+    This is password string.
+
+- $params{password\_hash}
+
+    This is hashed password to be compared.
+
+- $params{hash\_info}
+ 
+
+    This is a hash information.
+    You have to inherit [Crypt::Password::StretchedHash::HashInfo](http://search.cpan.org/perldoc?Crypt::Password::StretchedHash::HashInfo).
 
 # LICENSE
 
