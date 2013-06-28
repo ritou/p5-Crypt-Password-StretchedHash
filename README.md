@@ -7,22 +7,23 @@ Crypt::Password::StretchedHash - simple library for password hashing and stretch
 This module provides Generation / Verification method for hashed password string.
 There are two methods to handle parameters simply.
 
-    use Test::More;
-    use Crypt::Password::StretchedHash;
+    use Crypt::Password::StretchedHash qw(
+        crypt
+        verify
+    );
     use Digest::SHA;
 
     # crypt
-    my $pwhash = Crypt::Password::StretchedHash->crypt(
+    my $pwhash = crypt(
         password        => q{password},
         hash            => Digest::SHA->new("sha256"),
         salt            => q{salt},
         stretch_count   => 5000,
         format          => q{base64},
     );
-    is($pwhash, q{4hvvzqZio+l9vGifQ7xF2+FKiyWRcb4lV3OSo9PsfUw=});
 
     # verify
-    my $result = Crypt::Password::StretchedHash->verify(
+    my $result = verify(
         password        => q{password},
         password_hash   => q{4hvvzqZio+l9vGifQ7xF2+FKiyWRcb4lV3OSo9PsfUw=},
         hash            => Digest::SHA->new("sha256"),
@@ -31,15 +32,16 @@ There are two methods to handle parameters simply.
         format          => q{base64},
     );
 
-    unless ( $result ) {
-        # password error
-    }
+
 
 if you use class of the hash information(Crypt::Passwoed::SaltedHash::HashInfo),
 there are two methods to generate/verify string for DB Store. 
 
     use Your::Password::HashInfo;
-    use Crypt::Password::StretchedHash;
+    use Crypt::Password::StretchedHash qw(
+        crypt_with_hashinfo
+        verify_with_hashinfo
+    );
     
 
     my $hash_info = Your::Password::HashInfo->new;
@@ -59,11 +61,6 @@ there are two methods to generate/verify string for DB Store.
         password_hash   => $pwhash_with_hashinfo,
         hash_info   => $hash_info,
     );
-    
-
-    unless ( $result ) {
-        # password error
-    }
 
 # DESCRIPTION
 

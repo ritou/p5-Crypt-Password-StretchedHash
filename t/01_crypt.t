@@ -2,7 +2,9 @@ use strict;
 use warnings;
 
 use Test::More;
-use Crypt::Password::StretchedHash;
+use Crypt::Password::StretchedHash qw(
+    crypt
+);
 use Digest::SHA;
 use Digest::SHA3;
 use MIME::Base64 qw(
@@ -27,7 +29,7 @@ sub manual_crypt_sha256 {
 
 TEST_CRYPT_MONDATORY: {
 
-    my $pwhash = Crypt::Password::StretchedHash->crypt(
+    my $pwhash = Crypt::Password::StretchedHash::crypt(
         password        => q{password},
         hash            => Digest::SHA->new("sha256"),
         salt            => q{salt},
@@ -39,6 +41,17 @@ TEST_CRYPT_MONDATORY: {
     my $expected =  manual_crypt_sha256;
     is($pwhash, $expected);
 
+    $pwhash = crypt(
+        password        => q{password},
+        hash            => Digest::SHA->new("sha256"),
+        salt            => q{salt},
+        stretch_count   => 5000,
+    );
+    ok($pwhash, q{password hash is returned});
+    $pwhash = encode_base64( $pwhash );
+    chomp($pwhash);
+    is($pwhash, $expected);
+
 };
 
 TEST_CRYPT_VALIDATE: {
@@ -46,7 +59,7 @@ TEST_CRYPT_VALIDATE: {
     my $pwhash;
     # mondatory
     eval {
-        $pwhash = Crypt::Password::StretchedHash->crypt(
+        $pwhash = crypt(
             hash            => Digest::SHA->new("sha256"),
             salt            => q{salt},
             stretch_count   => 5000,
@@ -55,7 +68,7 @@ TEST_CRYPT_VALIDATE: {
     ok($@, q{error has returned.});
 
     eval {
-        $pwhash = Crypt::Password::StretchedHash->crypt(
+        $pwhash = crypt(
             password        => q{password},
             salt            => q{salt},
             stretch_count   => 5000,
@@ -64,7 +77,7 @@ TEST_CRYPT_VALIDATE: {
     ok($@, q{error has returned.});
 
     eval {
-        $pwhash = Crypt::Password::StretchedHash->crypt(
+        $pwhash = crypt(
             password        => q{password},
             hash            => Digest::SHA->new("sha256"),
             stretch_count   => 5000,
@@ -73,7 +86,7 @@ TEST_CRYPT_VALIDATE: {
     ok($@, q{error has returned.});
 
     eval {
-        $pwhash = Crypt::Password::StretchedHash->crypt(
+        $pwhash = crypt(
             password        => q{password},
             hash            => Digest::SHA->new("sha256"),
             salt            => q{salt},
@@ -83,7 +96,7 @@ TEST_CRYPT_VALIDATE: {
 
     # password is not SCALAR
     eval {
-        $pwhash = Crypt::Password::StretchedHash->crypt(
+        $pwhash = crypt(
             password        => qw{password1 password2},
             hash            => Digest::SHA->new("sha256"),
             salt            => q{salt},
@@ -94,7 +107,7 @@ TEST_CRYPT_VALIDATE: {
 
     # hash is not Digest::SHAx
     eval {
-        $pwhash = Crypt::Password::StretchedHash->crypt(
+        $pwhash = crypt(
             password        => q{password},
             hash            => q{scalar text},
             salt            => q{salt},
@@ -105,7 +118,7 @@ TEST_CRYPT_VALIDATE: {
 
     # salt is not SCALAR
     eval {
-        $pwhash = Crypt::Password::StretchedHash->crypt(
+        $pwhash = crypt(
             password        => q{password},
             hash            => Digest::SHA->new("sha256"),
             salt            => qw{salt1 salt2},
@@ -116,7 +129,7 @@ TEST_CRYPT_VALIDATE: {
 
     # stretch_count is not SCALAR and int
     eval {
-        $pwhash = Crypt::Password::StretchedHash->crypt(
+        $pwhash = crypt(
             password        => q{password},
             hash            => Digest::SHA->new("sha256"),
             salt            => q{salt},
@@ -126,7 +139,7 @@ TEST_CRYPT_VALIDATE: {
     ok($@, q{error has returned.});
 
     eval {
-        $pwhash = Crypt::Password::StretchedHash->crypt(
+        $pwhash = crypt(
             password        => q{password},
             hash            => Digest::SHA->new("sha256"),
             salt            => q{salt},
@@ -136,7 +149,7 @@ TEST_CRYPT_VALIDATE: {
     ok($@, q{error has returned.});
 
     eval {
-        $pwhash = Crypt::Password::StretchedHash->crypt(
+        $pwhash = crypt(
             password        => q{password},
             hash            => Digest::SHA->new("sha256"),
             salt            => q{salt},
@@ -149,7 +162,7 @@ TEST_CRYPT_VALIDATE: {
 TEST_CRYPT_FORMAT: {
 
     # format is hex
-    my $pwhash = Crypt::Password::StretchedHash->crypt(
+    my $pwhash = crypt(
         password        => q{password},
         hash            => Digest::SHA->new("sha256"),
         salt            => q{salt},
@@ -160,7 +173,7 @@ TEST_CRYPT_FORMAT: {
     is($pwhash, q{e21befcea662a3e97dbc689f43bc45dbe14a8b259171be25577392a3d3ec7d4c});
 
     # base64
-    $pwhash = Crypt::Password::StretchedHash->crypt(
+    $pwhash = crypt(
         password        => q{password},
         hash            => Digest::SHA->new("sha256"),
         salt            => q{salt},
@@ -174,7 +187,7 @@ TEST_CRYPT_FORMAT: {
 
 TEST_CRYPT_SHAx: {
 
-    my $pwhash = Crypt::Password::StretchedHash->crypt(
+    my $pwhash = crypt(
         password        => q{password},
         hash            => Digest::SHA3->new("sha3_256"),
         salt            => q{salt},

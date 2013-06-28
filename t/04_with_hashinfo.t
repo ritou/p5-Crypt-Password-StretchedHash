@@ -2,7 +2,10 @@ use strict;
 use warnings;
 
 use Test::More;
-use Crypt::Password::StretchedHash;
+use Crypt::Password::StretchedHash qw(
+    crypt_with_hashinfo
+    verify_with_hashinfo
+);
 use Digest::SHA;
 use lib 't/lib';
 use TestHashInfo;
@@ -21,7 +24,7 @@ TEST_CRYPT_WITH_HASHINFO: {
     $hash_info->set_stretch_count(5000);
     $hash_info->set_format(q{base64});
 
-    my $pwhash = Crypt::Password::StretchedHash->crypt_with_hashinfo(
+    my $pwhash = crypt_with_hashinfo(
         password    => q{password},
         hash_info   => $hash_info,
     );
@@ -30,7 +33,7 @@ TEST_CRYPT_WITH_HASHINFO: {
 
     # delimiter
     $hash_info->set_delimiter(q{%});
-    $pwhash = Crypt::Password::StretchedHash->crypt_with_hashinfo(
+    $pwhash = crypt_with_hashinfo(
         password    => q{password},
         hash_info   => $hash_info,
     );
@@ -40,7 +43,7 @@ TEST_CRYPT_WITH_HASHINFO: {
 
     # identifier
     $hash_info->set_identifier(q{2});
-    $pwhash = Crypt::Password::StretchedHash->crypt_with_hashinfo(
+    $pwhash = crypt_with_hashinfo(
         password    => q{password},
         hash_info   => $hash_info,
     );
@@ -50,7 +53,7 @@ TEST_CRYPT_WITH_HASHINFO: {
 
     # hash
     $hash_info->set_hash(Digest::SHA->new("sha512"));
-    $pwhash = Crypt::Password::StretchedHash->crypt_with_hashinfo(
+    $pwhash = crypt_with_hashinfo(
         password    => q{password},
         hash_info   => $hash_info,
     );
@@ -60,7 +63,7 @@ TEST_CRYPT_WITH_HASHINFO: {
 
     # salt
     $hash_info->set_salt(q{test_salt2_1234567890});
-    $pwhash = Crypt::Password::StretchedHash->crypt_with_hashinfo(
+    $pwhash = crypt_with_hashinfo(
         password    => q{password},
         hash_info   => $hash_info,
     );
@@ -70,7 +73,7 @@ TEST_CRYPT_WITH_HASHINFO: {
 
     # stretch_count
     $hash_info->set_stretch_count(q{1000});
-    $pwhash = Crypt::Password::StretchedHash->crypt_with_hashinfo(
+    $pwhash = crypt_with_hashinfo(
         password    => q{password},
         hash_info   => $hash_info,
     );
@@ -80,7 +83,7 @@ TEST_CRYPT_WITH_HASHINFO: {
 
     # format : hex
     $hash_info->set_format(q{hex});
-    $pwhash = Crypt::Password::StretchedHash->crypt_with_hashinfo(
+    $pwhash = crypt_with_hashinfo(
         password    => q{password},
         hash_info   => $hash_info,
     );
@@ -98,35 +101,35 @@ TEST_VERIFY_WITH_HASHINFO: {
     $hash_info->set_stretch_count(5000);
     $hash_info->set_format(q{base64});
 
-    my $result = Crypt::Password::StretchedHash->verify_with_hashinfo(
+    my $result = verify_with_hashinfo(
         password        => q{password},
         password_hash   => q{invalid_password_hash},
         hash_info       => $hash_info,
     );
     ok( !$result, q{password is not matched});
 
-    $result = Crypt::Password::StretchedHash->verify_with_hashinfo(
+    $result = verify_with_hashinfo(
         password        => q{password},
         password_hash   => q{$1$dGVzdF9zYWx0XzEyMzQ1Njc4OTA=$6t8PoejG3He/QujMmN1MpBi5iwNY9t0mdl+OHOwceo0=},
         hash_info       => $hash_info,
     );
     ok( $result, q{password is matched});
 
-    $result = Crypt::Password::StretchedHash->verify_with_hashinfo(
+    $result = verify_with_hashinfo(
         password        => q{password},
         password_hash   => q{$$dGVzdF9zYWx0XzEyMzQ1Njc4OTA=$6t8PoejG3He/QujMmN1MpBi5iwNY9t0mdl+OHOwceo0=},
         hash_info       => $hash_info,
     );
     ok( !$result, q{no identifier});
 
-    $result = Crypt::Password::StretchedHash->verify_with_hashinfo(
+    $result = verify_with_hashinfo(
         password        => q{password},
         password_hash   => q{$1$$6t8PoejG3He/QujMmN1MpBi5iwNY9t0mdl+OHOwceo0=},
         hash_info       => $hash_info,
     );
     ok( !$result, q{no salt});
 
-    $result = Crypt::Password::StretchedHash->verify_with_hashinfo(
+    $result = verify_with_hashinfo(
         password        => q{password},
         password_hash   => q{$1$dGVzdF9zYWx0XzEyMzQ1Njc4OTA=$},
         hash_info       => $hash_info,
@@ -134,7 +137,7 @@ TEST_VERIFY_WITH_HASHINFO: {
     ok( !$result, q{no password hash});
 
     $hash_info->set_delimiter(q{%});
-    $result = Crypt::Password::StretchedHash->verify_with_hashinfo(
+    $result = verify_with_hashinfo(
         password        => q{password},
         password_hash   => q{$1$dGVzdF9zYWx0XzEyMzQ1Njc4OTA=$6t8PoejG3He/QujMmN1MpBi5iwNY9t0mdl+OHOwceo0=},
         hash_info       => $hash_info,
@@ -143,7 +146,7 @@ TEST_VERIFY_WITH_HASHINFO: {
     $hash_info->set_delimiter(q{$});
     
     $hash_info->set_identifier(q{2});
-    $result = Crypt::Password::StretchedHash->verify_with_hashinfo(
+    $result = verify_with_hashinfo(
         password        => q{password},
         password_hash   => q{$1$dGVzdF9zYWx0XzEyMzQ1Njc4OTA=$6t8PoejG3He/QujMmN1MpBi5iwNY9t0mdl+OHOwceo0=},
         hash_info       => $hash_info,
@@ -152,7 +155,7 @@ TEST_VERIFY_WITH_HASHINFO: {
     $hash_info->set_identifier(q{1});
     
     $hash_info->set_hash(Digest::SHA->new("sha512"));
-    $result = Crypt::Password::StretchedHash->verify_with_hashinfo(
+    $result = verify_with_hashinfo(
         password        => q{password},
         password_hash   => q{$1$dGVzdF9zYWx0XzEyMzQ1Njc4OTA=$6t8PoejG3He/QujMmN1MpBi5iwNY9t0mdl+OHOwceo0=},
         hash_info       => $hash_info,
@@ -160,7 +163,7 @@ TEST_VERIFY_WITH_HASHINFO: {
     ok( !$result, q{hash function is different});
     $hash_info->set_hash(Digest::SHA->new("sha256"));
 
-    $result = Crypt::Password::StretchedHash->verify_with_hashinfo(
+    $result = verify_with_hashinfo(
         password        => q{password},
         password_hash   => q{$1$dGVzdF9zYWx0Ml8xMjM0NTY3ODkw$6t8PoejG3He/QujMmN1MpBi5iwNY9t0mdl+OHOwceo0=},
         hash_info       => $hash_info,
@@ -168,7 +171,7 @@ TEST_VERIFY_WITH_HASHINFO: {
     ok( !$result, q{salt is different});
 
     $hash_info->set_stretch_count(4999);
-    $result = Crypt::Password::StretchedHash->verify_with_hashinfo(
+    $result = verify_with_hashinfo(
         password        => q{password},
         password_hash   => q{$1$dGVzdF9zYWx0XzEyMzQ1Njc4OTA=$6t8PoejG3He/QujMmN1MpBi5iwNY9t0mdl+OHOwceo0=},
         hash_info       => $hash_info,
@@ -177,7 +180,7 @@ TEST_VERIFY_WITH_HASHINFO: {
     $hash_info->set_stretch_count(5000);
 
     $hash_info->set_format(q{hex});
-    $result = Crypt::Password::StretchedHash->verify_with_hashinfo(
+    $result = verify_with_hashinfo(
         password        => q{password},
         password_hash   => q{$1$dGVzdF9zYWx0XzEyMzQ1Njc4OTA=$6t8PoejG3He/QujMmN1MpBi5iwNY9t0mdl+OHOwceo0=},
         hash_info       => $hash_info,

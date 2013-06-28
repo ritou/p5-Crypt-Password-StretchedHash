@@ -1,5 +1,6 @@
 requires 'perl', '5.008001';
 
+requires 'Exporter';
 requires 'parent';
 requires 'MIME::Base64';
 requires 'Carp';
